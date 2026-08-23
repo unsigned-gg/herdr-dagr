@@ -2,7 +2,7 @@
 
 Your agent swarm as a live DAG, in a [herdr](https://herdr.dev) pane.
 
-![the dagr pane at full width: trace and attention queue above the compact active-work inspector](assets/pane-sidecar.svg)
+[![the compact dagr cockpit at 72 columns: trace above a docked active-work inspector](assets/pane-cockpit.png)](https://raw.githubusercontent.com/aemrebarut/herdr-dagr/main/assets/pane-cockpit.png)
 
 > *Dagr* is the Norse personification of day: he rides across the sky once
 > per cycle and illuminates everything below. Also, it's a DAG. With herdr's r.
@@ -164,12 +164,12 @@ single-cell ASCII working mark.
 
 ## Layout
 
-One responsive pane, two graph grammars, with a stable selected-item inspector
-at full width below the graph:
+One responsive pane with a stable selected-item inspector below the graph:
 
-- **At ~146 columns and up** (the screenshot above): trace left and a
+- **Below ~146 columns** (the cockpit shown at the top): a full-width trace.
+  tig's grammar.
+- **At ~146 columns and up** (the sidecar shown below): trace left and a
   compact attention queue right. lazygit's grammar.
-- **Below that**: full-width trace. tig's grammar.
 
 At either width, cursor movement updates a fixed four-line inspector without
 moving the graph. Its rounded, state-colored frame is deliberately distinct
@@ -192,13 +192,24 @@ Press `d` for a focus-plus-context view of the selected node's
 direct inputs and outputs; the complete detail body scrolls independently below
 it. Press `d` or `esc` to return to the exact graph position.
 
-![the compact layout at 72 columns: trace with the compact active-work inspector docked below](assets/pane-cockpit.svg)
+At wide widths, the same graph and inspector gain a right-hand attention queue:
 
-Both screenshots are real renderer output, regenerable with
+[![the wide dagr sidecar: trace and attention queue above the compact active-work inspector](assets/pane-sidecar.png)](https://raw.githubusercontent.com/aemrebarut/herdr-dagr/main/assets/pane-sidecar.png)
+
+Both PNGs are 2× mobile-friendly exports of real renderer output. The SVG
+source captures live beside them and remain regenerable with
 [`scripts/snapshot-svg.py`](scripts/snapshot-svg.py):
-`dagr view samples/run.json --snapshot --compact --width 150 --select L5r | python3 scripts/snapshot-svg.py out.svg`.
-Box-drawing cells become vector rails, so browser font metrics cannot open
-gaps that are absent in the terminal.
+
+```sh
+dagr view samples/run.json --snapshot --compact --width 150 --select L5r \
+  | python3 scripts/snapshot-svg.py assets/pane-sidecar.svg
+npx --yes sharp-cli@6.0.0 -i assets/pane-sidecar.svg -o assets --density 144 -f png
+```
+
+Change the width to `72` and the filename to `pane-cockpit` for the compact
+pair. Rasterization is a maintainer-only documentation step, not a dagr runtime
+dependency. SVG box-drawing cells use vector rails so browser font metrics
+cannot open gaps that are absent in the terminal.
 
 ## Navigation
 
@@ -319,8 +330,9 @@ Cargo is required only when building from source.
   `npx skills add aemrebarut/herdr-dagr --skill dagr-producer -g`, or
   print the bundled copy with `dagr --skill`. Its `examples/` are held
   strict-clean by the test suite.
-- [`assets/`](assets/): the README screenshots, generated from
-  `samples/run.json` by [`scripts/snapshot-svg.py`](scripts/snapshot-svg.py).
+- [`assets/`](assets/): mobile-friendly README PNGs and their SVG source
+  captures, generated from `samples/run.json` by
+  [`scripts/snapshot-svg.py`](scripts/snapshot-svg.py).
 
 ## Status
 

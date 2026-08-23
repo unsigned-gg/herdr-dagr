@@ -67,4 +67,53 @@ for path in sys.argv[1:]:
     assert max(right_edges) >= frame_width - 32, (path, "right side is unexpectedly empty")
 PY
 
+# README embeds real 2x PNGs (compact first for mobile), while SVGs remain
+# checked-in source captures. Parse every PNG chunk so truncation or a stale
+# low-resolution export cannot pass as a valid screenshot.
+python3 - "$root" <<'PY'
+import struct
+import sys
+import zlib
+from pathlib import Path
+
+root = Path(sys.argv[1])
+expected = {
+    root / "assets/pane-cockpit.png": (1274, 976),
+    root / "assets/pane-sidecar.png": (2584, 976),
+}
+for path, dimensions in expected.items():
+    raw = path.read_bytes()
+    assert raw[:8] == b"\x89PNG\r\n\x1a\n", path
+    offset = 8
+    chunks = []
+    ihdr = None
+    while offset < len(raw):
+        length = struct.unpack(">I", raw[offset : offset + 4])[0]
+        kind = raw[offset + 4 : offset + 8]
+        data = raw[offset + 8 : offset + 8 + length]
+        crc = struct.unpack(">I", raw[offset + 8 + length : offset + 12 + length])[0]
+        assert zlib.crc32(kind + data) & 0xFFFFFFFF == crc, (path, kind)
+        offset += 12 + length
+        if kind == b"IHDR":
+            ihdr = struct.unpack(">IIBBBBB", data)
+        elif kind == b"IDAT":
+            chunks.append(data)
+        elif kind == b"IEND":
+            break
+    assert ihdr is not None and ihdr[:2] == dimensions, (path, ihdr)
+    assert ihdr[2:] == (8, 6, 0, 0, 0), (path, "want non-interlaced 8-bit RGBA")
+    width, height = dimensions
+    assert len(zlib.decompress(b"".join(chunks))) == (width * 4 + 1) * height, path
+
+readme = (root / "scripts/public-overlays/README.md").read_text()
+assert "sharp-cli@6.0.0" in readme
+compact = readme.index("(assets/pane-cockpit.png)")
+wide = readme.index("(assets/pane-sidecar.png)")
+assert compact < wide, "compact mobile figure must appear before the wide sidecar"
+assert "(assets/pane-cockpit.svg)" not in readme
+assert "(assets/pane-sidecar.svg)" not in readme
+for name in ("pane-cockpit.png", "pane-sidecar.png"):
+    assert f"](https://raw.githubusercontent.com/aemrebarut/herdr-dagr/main/assets/{name})" in readme
+PY
+
 echo "public staging parity OK"
