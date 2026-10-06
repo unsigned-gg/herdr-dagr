@@ -2,6 +2,8 @@
 
 Your agent swarm as a live DAG, in a [herdr](https://herdr.dev) pane.
 
+> The estate distribution lives at [unsigned-gg/saga](https://github.com/unsigned-gg/saga) (`crates/dagr`). This repo tracks upstream.
+
 [![the compact dagr cockpit at 72 columns: trace above a docked active-work inspector](assets/pane-cockpit.png)](https://raw.githubusercontent.com/aemrebarut/herdr-dagr/main/assets/pane-cockpit.png)
 
 > *Dagr* is the Norse personification of day: he rides across the sky once
