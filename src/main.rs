@@ -14,6 +14,7 @@ mod scale;
 mod select;
 mod stats;
 mod style;
+pub mod telemetry_grammar;
 mod view;
 
 use std::process::ExitCode;
